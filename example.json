@@ -1,0 +1,28 @@
+[
+    {
+        "center": {
+            "x": 0,
+            "y": 0,
+            "z": -1
+        },
+        "radius": 0.5,
+        "color": {
+            "red": 1,
+            "blue": 0,
+            "green": 0
+        }
+    },
+    {
+        "center": {
+            "x": 0,
+            "y": -100.5,
+            "z": -1
+        },
+        "radius": 100,
+        "color": {
+            "red": 0,
+            "blue": 0,
+            "green": 1
+        }
+    }
+]
