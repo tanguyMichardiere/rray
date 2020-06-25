@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-#[derive(Deserialize, Copy, Clone)]
+#[derive(Deserialize, Clone)]
 pub struct Color {
     red: f64,
     green: f64,

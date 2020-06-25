@@ -14,37 +14,39 @@ struct Args {
     /// output file name (must end by ".png")
     #[argh(option, short = 'o')]
     output: Option<String>,
-    /// width of the image to generate ()
+    /// width of the image to generate (default: 1920)
     #[argh(option, short = 'w')]
     width: Option<usize>,
-    /// todo
+    /// height of the image to generate (default: 1080)
     #[argh(option, short = 'h')]
     height: Option<usize>,
-    /// todo
+    /// location of the camera (default: (0,0,0))
     #[argh(option, short = 'l')]
     camera_location: Option<Location>,
-    /// todo
+    /// direction of the camera (default: (0,0,-1))
     #[argh(option, short = 'd')]
     camera_direction: Option<UnitDirection>,
-    /// todo
-    #[argh(option, short = 'b')]
-    background: Option<Background>,
-    /// todo
+    /// focal length of the camera (default: 1)
     #[argh(option, short = 'f')]
     focal_length: Option<f64>,
+    /// background of the image (default: blue gradient)
+    #[argh(option, short = 'b')]
+    background: Option<Background>,
 }
 
 fn main() {
     let args: Args = argh::from_env();
     if !args.spheres.ends_with(".json") {
-        panic!("todo");
+        panic!("Error: spheres file must be a json file");
     }
-    let objects: Vec<Sphere> =
-        serde_json::from_str(&fs::read_to_string(&args.spheres).expect("todo")).expect("todo");
+    let objects: Vec<Sphere> = serde_json::from_str(
+        &fs::read_to_string(&args.spheres).expect(&format!("Error opening {}", &args.spheres)),
+    )
+    .expect(&format!("Error parsing {}", &args.spheres));
     let output = match args.output {
         Some(file_path) => {
             if !file_path.ends_with(".png") {
-                panic!("todo");
+                panic!("Error: output file must be a png file");
             }
             file_path
         }

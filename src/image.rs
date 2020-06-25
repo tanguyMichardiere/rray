@@ -87,7 +87,7 @@ impl Image {
                 let mut res = SuperColor::new();
                 let normal = (ray.at(lowest_t) - sphere.center).as_unit_vector();
                 // res.add(normal.as_color());
-                res.add(sphere.color);
+                res.add(sphere.color.clone());
                 res.add(ray::color::BLACK);
                 res.add(self.color(ray.diffuse(lowest_t, normal), spheres));
                 res.as_color()
