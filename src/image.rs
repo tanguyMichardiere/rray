@@ -36,9 +36,9 @@ impl Image {
             width: 1920,
             height: 1080,
             multisampling: 100,
-            location: Location::new(0.0, 0.0, 0.0),
+            location: Location::new(0.0, 0.0, 1.0),
             direction: UnitDirection::new(0.0, 0.0, -1.0),
-            focal_length: 1.0,
+            focal_length: 2.0,
             background: Background::BlueGradient,
             data: None,
         }

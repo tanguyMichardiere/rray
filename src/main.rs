@@ -20,13 +20,16 @@ struct Args {
     /// height of the image to generate (default: 1080)
     #[argh(option, short = 'h')]
     height: Option<usize>,
-    /// location of the camera (default: (0,0,0))
+    /// multisampling (default: 100)
+    #[argh(option, short = 'm')]
+    multisampling: Option<u8>,
+    /// location of the camera (default: (0,0,1))
     #[argh(option, short = 'l')]
     camera_location: Option<Location>,
     /// direction of the camera (default: (0,0,-1))
     #[argh(option, short = 'd')]
     camera_direction: Option<UnitDirection>,
-    /// focal length of the camera (default: 1)
+    /// focal length of the camera (default: 2)
     #[argh(option, short = 'f')]
     focal_length: Option<f64>,
     /// background of the image (default: blue gradient)
@@ -59,6 +62,10 @@ fn main() {
     }
     match args.height {
         Some(height) => image.height = height,
+        None => (),
+    }
+    match args.multisampling {
+        Some(multisampling) => image.multisampling = multisampling,
         None => (),
     }
     match args.camera_location {

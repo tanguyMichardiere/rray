@@ -75,7 +75,7 @@ impl Background {
                 let t = 0.5 * (ray.direction.get_y() + 1.0);
                 Color::new(1.0 - 0.5 * t, 1.0 - 0.3 * t, 1.0)
             }
-            Background::Black => Color::new(0.0, 0.0, 0.0),
+            Background::Black => color::BLACK,
         }
     }
 }

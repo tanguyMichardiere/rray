@@ -1,4 +1,6 @@
 /target
 /.vscode
 /*.json
+!/example.json
 /*.png
+!/example.png
