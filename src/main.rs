@@ -55,35 +55,16 @@ fn main() {
         }
         None => args.spheres.replace(".json", ".png"),
     };
-    let mut image = image::Image::new();
-    match args.width {
-        Some(width) => image.width = width,
-        None => (),
-    }
-    match args.height {
-        Some(height) => image.height = height,
-        None => (),
-    }
-    match args.multisampling {
-        Some(multisampling) => image.multisampling = multisampling,
-        None => (),
-    }
-    match args.camera_location {
-        Some(location) => image.location = location,
-        None => (),
-    }
-    match args.camera_direction {
-        Some(direction) => image.direction = direction,
-        None => (),
-    }
-    match args.fov {
-        Some(fov) => image.fov = fov,
-        None => (),
-    }
-    match args.background {
-        Some(background) => image.background = background,
-        None => (),
-    }
+    let mut image = image::Image::new(
+        args.width.unwrap_or(1920),
+        args.height.unwrap_or(1080),
+        args.multisampling.unwrap_or(100),
+        args.camera_location.unwrap_or(Location::new(0.0, 0.0, 0.0)),
+        args.camera_direction
+            .unwrap_or(UnitDirection::new(0.0, 0.0, -1.0)),
+        args.fov.unwrap_or(80.0),
+        args.background.unwrap_or(Background::BlueGradient),
+    );
     image.compute(objects);
     image.write(&output);
 }

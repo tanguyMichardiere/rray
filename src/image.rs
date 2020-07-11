@@ -12,17 +12,6 @@ use std::fs::File;
 use std::io::BufWriter;
 use std::path::Path;
 
-pub struct Image {
-    pub width: usize,
-    pub height: usize,
-    pub multisampling: u8,
-    pub location: Location,
-    pub direction: UnitDirection,
-    pub fov: f64,
-    pub background: Background,
-    pub data: Option<Vec<u8>>,
-}
-
 struct Viewport {
     origin: Location,
     corner: Location,
@@ -30,40 +19,57 @@ struct Viewport {
     y_step: Direction,
 }
 
-impl Image {
-    pub fn new() -> Self {
-        Image {
-            width: 1920,
-            height: 1080,
-            multisampling: 100,
-            location: Location::new(0.0, 0.0, 0.0),
-            direction: UnitDirection::new(0.0, 0.0, -1.0),
-            fov: 80.0,
-            background: Background::BlueGradient,
-            data: None,
-        }
-    }
+pub struct Image {
+    width: usize,
+    height: usize,
+    multisampling: u8,
+    viewport: Viewport,
+    background: Background,
+    data: Option<Vec<u8>>,
+}
 
-    fn aspect_ratio(&self) -> f64 {
-        (self.width as f64) / (self.height as f64)
-    }
-
-    fn viewport(&self) -> Viewport {
-        let center = self.location + self.direction;
-        let ar = self.aspect_ratio();
-        let mut hor = self
-            .direction
-            .rot(UnitDirection::new(0.0, 1.0, 0.0), PI / 2.0);
+impl Viewport {
+    fn new(
+        width: usize,
+        height: usize,
+        location: Location,
+        direction: UnitDirection,
+        fov: f64,
+    ) -> Viewport {
+        let center = location + direction;
+        let ar = (width as f64) / (height as f64);
+        let mut hor = direction.rot(UnitDirection::new(0.0, 1.0, 0.0), PI / 2.0);
         hor.set_y(0.0);
-        let ver = (self.direction ^ -hor).as_unit_vector();
-        let half_width = (self.fov / 2.0).tan();
+        let ver = (direction ^ -hor).as_unit_vector();
+        let half_width = (fov / 2.0).tan();
         let half_height = half_width / ar;
         let corner = center - half_width * hor + half_height * ver;
         Viewport {
-            origin: self.location,
+            origin: location,
             corner,
-            x_step: (2.0 * half_width / self.width as f64) * hor,
-            y_step: (-2.0 * half_height / self.height as f64) * ver,
+            x_step: (2.0 * half_width / width as f64) * hor,
+            y_step: (-2.0 * half_height / height as f64) * ver,
+        }
+    }
+}
+
+impl Image {
+    pub fn new(
+        width: usize,
+        height: usize,
+        multisampling: u8,
+        location: Location,
+        direction: UnitDirection,
+        fov: f64,
+        background: Background,
+    ) -> Self {
+        Image {
+            width,
+            height,
+            multisampling,
+            viewport: Viewport::new(width, height, location, direction, fov),
+            background,
+            data: None,
         }
     }
 
@@ -98,22 +104,16 @@ impl Image {
         }
     }
 
-    fn compute_pixel(
-        &self,
-        viewport: &Viewport,
-        x: usize,
-        y: usize,
-        spheres: &Vec<Sphere>,
-    ) -> Color {
+    fn compute_pixel(&self, x: usize, y: usize, spheres: &Vec<Sphere>) -> Color {
         let mut res = SuperColor::new();
         let mut rng = rand::thread_rng();
         for _ in 0..self.multisampling {
             let ray = Ray::new(
-                viewport.origin,
-                (viewport.corner
-                    + (x as f64 + rng.gen::<f64>()) * viewport.x_step
-                    + (y as f64 + rng.gen::<f64>()) * viewport.y_step
-                    - viewport.origin)
+                self.viewport.origin,
+                (self.viewport.corner
+                    + (x as f64 + rng.gen::<f64>()) * self.viewport.x_step
+                    + (y as f64 + rng.gen::<f64>()) * self.viewport.y_step
+                    - self.viewport.origin)
                     .as_unit_vector(),
             );
             res.add(self.color(ray, spheres));
@@ -123,7 +123,6 @@ impl Image {
 
     pub fn compute(&mut self, spheres: Vec<Sphere>) {
         let mut data = vec![0; 3 * self.width * self.height];
-        let viewport = self.viewport();
         data.par_chunks_mut(3 * self.width)
             .enumerate()
             .progress_with(
@@ -132,7 +131,7 @@ impl Image {
             )
             .for_each(|(y, row)| {
                 row.chunks_mut(3).enumerate().for_each(|(x, pixel)| {
-                    let color = self.compute_pixel(&viewport, x, y, &spheres);
+                    let color = self.compute_pixel(x, y, &spheres);
                     pixel[0] = color.get_red();
                     pixel[1] = color.get_green();
                     pixel[2] = color.get_blue();
