@@ -23,15 +23,15 @@ struct Args {
     /// multisampling (default: 100)
     #[argh(option, short = 'm')]
     multisampling: Option<u8>,
-    /// location of the camera (default: (0,0,1))
+    /// location of the camera (default: (0,0,0))
     #[argh(option, short = 'l')]
     camera_location: Option<Location>,
     /// direction of the camera (default: (0,0,-1))
     #[argh(option, short = 'd')]
     camera_direction: Option<UnitDirection>,
-    /// focal length of the camera (default: 2)
+    /// field of view of the camera in degrees (default: 80)
     #[argh(option, short = 'f')]
-    focal_length: Option<f64>,
+    fov: Option<f64>,
     /// background of the image (default: blue gradient)
     #[argh(option, short = 'b')]
     background: Option<Background>,
@@ -76,8 +76,8 @@ fn main() {
         Some(direction) => image.direction = direction,
         None => (),
     }
-    match args.focal_length {
-        Some(focal_length) => image.focal_length = focal_length,
+    match args.fov {
+        Some(fov) => image.fov = fov,
         None => (),
     }
     match args.background {

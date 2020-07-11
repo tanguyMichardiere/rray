@@ -18,7 +18,7 @@ pub struct Image {
     pub multisampling: u8,
     pub location: Location,
     pub direction: UnitDirection,
-    pub focal_length: f64,
+    pub fov: f64,
     pub background: Background,
     pub data: Option<Vec<u8>>,
 }
@@ -36,9 +36,9 @@ impl Image {
             width: 1920,
             height: 1080,
             multisampling: 100,
-            location: Location::new(0.0, 0.0, 1.0),
+            location: Location::new(0.0, 0.0, 0.0),
             direction: UnitDirection::new(0.0, 0.0, -1.0),
-            focal_length: 2.0,
+            fov: 80.0,
             background: Background::BlueGradient,
             data: None,
         }
@@ -49,19 +49,21 @@ impl Image {
     }
 
     fn viewport(&self) -> Viewport {
-        let center = self.location + self.focal_length * self.direction;
+        let center = self.location + self.direction;
         let ar = self.aspect_ratio();
         let mut hor = self
             .direction
-            .rot(UnitDirection::new(0.0, 1.0, 0.0), -PI / 2.0);
+            .rot(UnitDirection::new(0.0, 1.0, 0.0), PI / 2.0);
         hor.set_y(0.0);
         let ver = (self.direction ^ -hor).as_unit_vector();
-        let corner = center - ar * hor + ver;
+        let half_width = (self.fov / 2.0).tan();
+        let half_height = half_width / ar;
+        let corner = center - half_width * hor + half_height * ver;
         Viewport {
             origin: self.location,
             corner,
-            x_step: (2.0 * ar / self.width as f64) * hor,
-            y_step: (-2.0 / self.height as f64) * ver,
+            x_step: (2.0 * half_width / self.width as f64) * hor,
+            y_step: (-2.0 * half_height / self.height as f64) * ver,
         }
     }
 
@@ -98,7 +100,7 @@ impl Image {
 
     fn compute_pixel(
         &self,
-        viewport: Viewport,
+        viewport: &Viewport,
         x: usize,
         y: usize,
         spheres: &Vec<Sphere>,
@@ -121,6 +123,7 @@ impl Image {
 
     pub fn compute(&mut self, spheres: Vec<Sphere>) {
         let mut data = vec![0; 3 * self.width * self.height];
+        let viewport = self.viewport();
         data.par_chunks_mut(3 * self.width)
             .enumerate()
             .progress_with(
@@ -129,7 +132,7 @@ impl Image {
             )
             .for_each(|(y, row)| {
                 row.chunks_mut(3).enumerate().for_each(|(x, pixel)| {
-                    let color = self.compute_pixel(self.viewport(), x, y, &spheres);
+                    let color = self.compute_pixel(&viewport, x, y, &spheres);
                     pixel[0] = color.get_red();
                     pixel[1] = color.get_green();
                     pixel[2] = color.get_blue();

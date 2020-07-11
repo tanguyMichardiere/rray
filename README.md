@@ -34,8 +34,8 @@ Options:
                     location of the camera (default: (0,0,0))
   -d, --camera-direction
                     direction of the camera (default: (0,0,-1))
-  -f, --focal-length
-                    focal length of the camera (default: 1)
+  -f, --fov
+                    field of view of the camera in degrees (default: 80)
   -b, --background  background of the image (default: blue gradient)
   --help            display usage information
 ```
@@ -50,7 +50,7 @@ Each sphere is defined by the coordinates of its center, its radius and its colo
         "center": {
             "x": 0,
             "y": 0,
-            "z": -1
+            "z": -2
         },
         "radius": 0.5,
         "color": {
@@ -63,7 +63,7 @@ Each sphere is defined by the coordinates of its center, its radius and its colo
         "center": {
             "x": 0,
             "y": -100.5,
-            "z": -1
+            "z": -2
         },
         "radius": 100,
         "color": {
