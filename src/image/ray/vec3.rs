@@ -6,9 +6,9 @@ use std::ops::{Add, BitXor, Div, Mul, Neg, Sub};
 
 #[derive(Deserialize, Copy, Clone)]
 pub struct Vector {
-    pub x: f64,
-    pub y: f64,
-    pub z: f64,
+    x: f64,
+    y: f64,
+    z: f64,
 }
 
 pub type Location = Vector;
@@ -29,8 +29,7 @@ impl Vector {
     }
 
     pub fn as_unit_vector(&self) -> UnitVector {
-        let k = 1.0 / self.length();
-        UnitVector::new(k * self.x, k * self.y, k * self.z)
+        UnitVector::new(self.x, self.y, self.z)
     }
 
     pub fn length(&self) -> f64 {
@@ -106,8 +105,7 @@ impl UnitVector {
     }
 
     pub fn rot(self, axis: UnitVector, angle: f64) -> Self {
-        let c = angle.cos();
-        (c * self + (1.0 - c) * (self * axis) * axis + angle.sin() * (axis ^ self)).as_unit_vector()
+        self.as_vector().rot(axis, angle).as_unit_vector()
     }
 
     pub fn random_on_unit_sphere() -> Self {
@@ -115,52 +113,39 @@ impl UnitVector {
     }
 }
 
+fn parse_vector_arg(value: &str) -> Result<(f64, f64, f64), String> {
+    let t: Vec<&str> = value
+        .trim_matches(|p| p == '(' || p == ')')
+        .split(',')
+        .collect();
+    let x;
+    let y;
+    let z;
+    match t[0].parse::<f64>() {
+        Ok(f) => x = f,
+        Err(e) => return Err(format!("{} for x", e)),
+    }
+    match t[1].parse::<f64>() {
+        Ok(f) => y = f,
+        Err(e) => return Err(format!("{} for y", e)),
+    }
+    match t[2].parse::<f64>() {
+        Ok(f) => z = f,
+        Err(e) => return Err(format!("{} for z", e)),
+    }
+    Ok((x, y, z))
+}
+
 impl FromArgValue for Vector {
     fn from_arg_value(value: &str) -> Result<Self, String> {
-        let t: Vec<&str> = value
-            .trim_matches(|p| p == '(' || p == ')')
-            .split(',')
-            .collect();
-        let x;
-        let y;
-        let z;
-        match t[0].parse::<f64>() {
-            Ok(f) => x = f,
-            Err(e) => return Err(format!("{} for x", e)),
-        }
-        match t[1].parse::<f64>() {
-            Ok(f) => y = f,
-            Err(e) => return Err(format!("{} for y", e)),
-        }
-        match t[2].parse::<f64>() {
-            Ok(f) => z = f,
-            Err(e) => return Err(format!("{} for z", e)),
-        }
+        let (x, y, z) = parse_vector_arg(value)?;
         Ok(Vector::new(x, y, z))
     }
 }
 
 impl FromArgValue for UnitVector {
     fn from_arg_value(value: &str) -> Result<Self, String> {
-        let t: Vec<&str> = value
-            .trim_matches(|p| p == '(' || p == ')')
-            .split(',')
-            .collect();
-        let x;
-        let y;
-        let z;
-        match t[0].parse::<f64>() {
-            Ok(f) => x = f,
-            Err(e) => return Err(format!("{} for x", e)),
-        }
-        match t[1].parse::<f64>() {
-            Ok(f) => y = f,
-            Err(e) => return Err(format!("{} for y", e)),
-        }
-        match t[2].parse::<f64>() {
-            Ok(f) => z = f,
-            Err(e) => return Err(format!("{} for z", e)),
-        }
+        let (x, y, z) = parse_vector_arg(value)?;
         Ok(UnitVector::new(x, y, z))
     }
 }

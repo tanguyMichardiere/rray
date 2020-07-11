@@ -9,15 +9,15 @@ use vec3::{Location, UnitDirection};
 #[derive(Deserialize)]
 pub struct Sphere {
     pub center: Location,
-    pub radius: f64,
+    radius: f64,
     pub color: Color,
 }
 
 pub struct Ray {
-    pub location: Location,
-    pub direction: UnitDirection,
+    location: Location,
+    direction: UnitDirection,
     pub range: f64,
-    pub ttl: u8,
+    ttl: u8,
 }
 
 pub enum Background {

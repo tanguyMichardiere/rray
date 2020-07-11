@@ -37,11 +37,11 @@ impl Viewport {
         fov: f64,
     ) -> Viewport {
         let center = location + direction;
-        let ar = (width as f64) / (height as f64);
-        let mut hor = direction.rot(UnitDirection::new(0.0, 1.0, 0.0), PI / 2.0);
+        let ar = width as f64 / height as f64;
+        let mut hor = direction.rot(UnitDirection::new(0.0, 1.0, 0.0), -PI / 2.0);
         hor.set_y(0.0);
         let ver = (direction ^ -hor).as_unit_vector();
-        let half_width = (fov / 2.0).tan();
+        let half_width = (fov * PI / 360.0).tan();
         let half_height = half_width / ar;
         let corner = center - half_width * hor + half_height * ver;
         Viewport {
